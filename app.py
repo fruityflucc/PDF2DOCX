@@ -32,6 +32,7 @@ def cleanup_files(pdf_path, docx_path):
 
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
+    
     if request.method == 'POST':
         # Check if a file was uploaded
         if 'file' not in request.files:
@@ -142,4 +143,5 @@ def upload_file():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    app.run(debug=True) 
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
