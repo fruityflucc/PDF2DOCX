@@ -378,7 +378,10 @@
                     const url = window.URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'converted.docx';
+                    // Get the original filename and change extension to .docx
+                    const originalFilename = fileInput.files[0].name;
+                    const outputFilename = originalFilename.replace(/\.pdf$/i, '.docx');
+                    a.download = outputFilename;
                     document.body.appendChild(a);
                     a.click();
                     window.URL.revokeObjectURL(url);
