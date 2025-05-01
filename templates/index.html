@@ -231,6 +231,23 @@
             font-style: italic;
         }
 
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e5e7eb;
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--primary-hover));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 1.5rem;
@@ -285,6 +302,10 @@
                 <span>The file has been Converted!</span>
             </div>
             
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+            </div>
+            
             <button type="submit" class="submit-btn" id="submitBtn" disabled>
                 <span>Convert to Word</span>
                 <div class="loading-spinner" style="display: none;"></div>
@@ -300,6 +321,8 @@
         const submitBtn = document.getElementById('submitBtn');
         const fileName = document.getElementById('fileName');
         const successMessage = document.getElementById('successMessage');
+        const progressBar = document.getElementById('progressBar');
+        const progressBarFill = document.getElementById('progressBarFill');
         const form = document.querySelector('.upload-form');
 
         // Handle drag and drop
@@ -345,10 +368,17 @@
             handleFiles(e.target.files);
         });
 
+        // Handle file size limit
+        const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
         function handleFiles(files) {
             if (files.length > 0) {
                 const file = files[0];
                 if (file.type === 'application/pdf') {
+                    if (file.size > MAX_FILE_SIZE) {
+                        alert('File size exceeds 100MB limit. Please upload a smaller file.');
+                        return;
+                    }
                     fileName.querySelector('span').textContent = file.name;
                     fileName.style.display = 'flex';
                     submitBtn.disabled = false;
@@ -365,6 +395,8 @@
             submitBtn.querySelector('span').textContent = 'Converting...';
             submitBtn.querySelector('.loading-spinner').style.display = 'inline-block';
             successMessage.style.display = 'none';
+            progressBar.style.display = 'block';
+            progressBarFill.style.width = '0%';
 
             try {
                 const formData = new FormData(form);
@@ -389,24 +421,32 @@
                     
                     // Show success message
                     successMessage.style.display = 'flex';
+                    progressBarFill.style.width = '100%';
                     
                     // Reset button state after a short delay
                     setTimeout(() => {
                         submitBtn.disabled = false;
                         submitBtn.querySelector('span').textContent = 'Convert to Word';
                         submitBtn.querySelector('.loading-spinner').style.display = 'none';
+                        progressBar.style.display = 'none';
+                        progressBarFill.style.width = '0%';
                     }, 1000);
                 } else {
-                    alert('Conversion failed. Please try again.');
+                    const errorData = await response.json();
+                    alert(errorData.message || 'Conversion failed. Please try again.');
                     submitBtn.disabled = false;
                     submitBtn.querySelector('span').textContent = 'Convert to Word';
                     submitBtn.querySelector('.loading-spinner').style.display = 'none';
+                    progressBar.style.display = 'none';
+                    progressBarFill.style.width = '0%';
                 }
             } catch (error) {
                 alert('An error occurred during conversion. Please try again.');
                 submitBtn.disabled = false;
                 submitBtn.querySelector('span').textContent = 'Convert to Word';
                 submitBtn.querySelector('.loading-spinner').style.display = 'none';
+                progressBar.style.display = 'none';
+                progressBarFill.style.width = '0%';
             }
         });
     </script>
